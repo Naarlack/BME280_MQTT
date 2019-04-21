@@ -10,7 +10,7 @@ To-do:
     * root/stem/BME280/data -> for sending data from the BME280
     * root/stem/BME280/cmd  -> for sending and recieving commands
 * Add JSON functionality to the 'root/stem/BME280/data' topic so payloads can be more concise:
-    *{temperture: X, humidity: Y, pressure: Z}
+    * {temperture: X, humidity: Y, pressure: Z}
 * Add ability to set/change functionality via the 'root/stem/BME280/data' topic:
     * location  -> change the 'root/stem' location
     * voltage   -> get the voltage (for units being powered by battery)
