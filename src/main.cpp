@@ -17,6 +17,7 @@
 #define MQTT_TOPIC "house/backroom/BME280/"
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define BME280_I2C_ADDR 0x76
+#define PUB_DELAY 2000
 
 // Update these with values suitable for your network.
 const char* ssid = WIFI_SSID;
@@ -83,9 +84,9 @@ void reconnect() {
     if (client.connect("ESP8266Client")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(MQTT_TOPIC, "hello world");
+      client.publish(MQTT_TOPIC, "ONLINE");
       // ... and resubscribe
-      client.subscribe("ledStatus");
+      client.subscribe(MQTT_TOPIC);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -150,14 +151,26 @@ void loop()
     //Serial.print("Publish message: ");
     //Serial.println(msg);
 
+    char temperatureTopic[50];
+    strcpy(temperatureTopic,MQTT_TOPIC);
+    strcat(temperatureTopic,"temperature");
+
+    char humidityTopic[50];
+    strcpy(humidityTopic,MQTT_TOPIC);
+    strcat(humidityTopic,"humidity");
+
+    char pressureTopic[50];
+    strcpy(pressureTopic,MQTT_TOPIC);
+    strcat(pressureTopic,"pressure");
+
     dtostrf(bme.readTemperature(), 4, 2, temperaturePayload);
-    client.publish("house/livingroom/BME280/temperature", temperaturePayload);
+    client.publish(temperatureTopic, temperaturePayload);
     
     dtostrf(bme.readHumidity(), 4, 2, humidityPayload);
-    client.publish("house/livingroom/BME280/humidity", humidityPayload);
+    client.publish(humidityTopic, humidityPayload);
     
     dtostrf(bme.readPressure()/100.0, 5, 2, pressurePayload);
-    client.publish("house/livingroom/BME280/pressure", pressurePayload);
+    client.publish(pressureTopic, pressurePayload);
     
     printValues();
   }
