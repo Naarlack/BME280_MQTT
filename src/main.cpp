@@ -10,9 +10,9 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <ArduinoJson.h>
 
 #include "config.h"
-
 
 #define MQTT_TOPIC "house/backroom/BME280/"
 #define SEALEVELPRESSURE_HPA (1013.25)
@@ -27,6 +27,7 @@ const char* mqtt_server = MQTT_SERVER;
 char temperaturePayload[8];
 char humidityPayload[8];
 char pressurePayload[8];
+char jsonPayload[100];
 
 Adafruit_BME280 bme;
 WiFiClient espClient;
@@ -133,6 +134,7 @@ void setup()
       Serial.println("Could not find a valid BME280 sensor, check wiring!");
       while (1);
   }
+
 }
 
 void loop()
@@ -171,6 +173,25 @@ void loop()
     
     dtostrf(bme.readPressure()/100.0, 5, 2, pressurePayload);
     client.publish(pressureTopic, pressurePayload);
+
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& root = jsonBuffer.createObject();
+
+    root["temperature"] = temperaturePayload;
+    root["humidity"] = humidityPayload;
+    root["pressure"] = pressurePayload;
+
+    char dataTopic[50];
+    strcpy(dataTopic,MQTT_TOPIC);
+    strcat(dataTopic,"data");
+
+    //char jsonPayload[100];
+    root.printTo(jsonPayload);
+
+    client.publish(dataTopic, jsonPayload);
+
+    root.printTo(Serial);
+    Serial.println();
     
     printValues();
   }
